@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge-distillation-pipeline/main/assets/hero-v2.png" alt="FORGE — provenance-enforced VLA distillation" width="100%">
+  <img src="https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge/main/assets/hero-v2.png" alt="FORGE — provenance-enforced VLA distillation" width="100%">
 </p>
 
 <h3 align="center">PROVENANCE-ENFORCED VLA DISTILLATION · COMPRESSION · RUNTIME EXPORT</h3>

@@ -14,4 +14,4 @@ pending variants stay unpublished until their artifacts pass validation.
 ## Links
 
 - Repository: https://github.com/RobotFlow-Labs/anima-forge
-- Install: `curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge/main/install.sh | sh`
+- Install: `curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge/refs/heads/main/install.sh | sh`

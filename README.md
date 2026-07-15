@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge/main/assets/hero-v2.png" alt="FORGE — provenance-enforced VLA distillation" width="100%">
+  <img src="https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge/refs/heads/main/assets/hero-v2.png" alt="FORGE — provenance-enforced VLA distillation" width="100%">
 </p>
 
 <h3 align="center">PROVENANCE-ENFORCED VLA DISTILLATION · COMPRESSION · RUNTIME EXPORT</h3>
@@ -62,7 +62,7 @@ The one-line Linux/macOS installer sets up an isolated FORGE tool, selects the C
 CUDA backend, and puts `forge` on `PATH`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge/refs/heads/main/install.sh | sh
 ```
 
 Use `--cpu` or `--cuda` to force the Torch backend. The CPU path resolves official

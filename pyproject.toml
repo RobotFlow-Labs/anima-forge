@@ -74,9 +74,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline"
-Repository = "https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline"
-Issues = "https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/issues"
+Homepage = "https://github.com/RobotFlow-Labs/anima-forge"
+Repository = "https://github.com/RobotFlow-Labs/anima-forge"
+Issues = "https://github.com/RobotFlow-Labs/anima-forge/issues"
 
 [dependency-groups]
 dev = [

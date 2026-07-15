@@ -10,14 +10,13 @@
   <a href="#student-variants"><b>Students</b></a> ·
   <a href="#cli-tour"><b>CLI</b></a> ·
   <a href="#evaluation"><b>Evaluation</b></a> ·
-  <a href="https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/README.md"><b>Docs</b></a>
+  <a href="https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/README.md"><b>Docs</b></a>
 </p>
 
 <p align="center">
   <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-FF3B00">
   <img alt="Python" src="https://img.shields.io/badge/python-3.12-FF3B00">
   <img alt="PyTorch" src="https://img.shields.io/badge/pytorch-2.10-FF3B00">
-  <a href="https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/actions/workflows/ci.yaml"><img alt="FORGE CI" src="https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/actions/workflows/ci.yaml/badge.svg?branch=develop"></a>
   <img alt="Platform" src="https://img.shields.io/badge/runtime-ONNX%20%7C%20TensorRT%20%7C%20MLX-1A1A1A">
 </p>
 
@@ -63,7 +62,7 @@ The one-line Linux/macOS installer sets up an isolated FORGE tool, selects the C
 CUDA backend, and puts `forge` on `PATH`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge-distillation-pipeline/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge/main/install.sh | sh
 ```
 
 Use `--cpu` or `--cuda` to force the Torch backend. The CPU path resolves official
@@ -84,7 +83,7 @@ forge quickstart --yes
 
 If you need an unreleased checkout instead of the public PyPI package, install the wheel built
 from this repository and pass a real local label directory. See the fully copy-pasteable
-[`docs/QUICKSTART.md`](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/QUICKSTART.md)
+[`docs/QUICKSTART.md`](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/QUICKSTART.md)
 path and its publication status note.
 
 ## How it works
@@ -138,7 +137,7 @@ forge top --json                    # agent-oriented status snapshot
 ```
 
 Full reference:
-[`docs/CLI_REFERENCE.md`](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/CLI_REFERENCE.md)
+[`docs/CLI_REFERENCE.md`](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/CLI_REFERENCE.md)
 
 ## Evaluation
 
@@ -167,21 +166,21 @@ src/forge/
 ```
 
 Deep dive:
-[`docs/ARCHITECTURE.md`](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/ARCHITECTURE.md)
+[`docs/ARCHITECTURE.md`](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/ARCHITECTURE.md)
 
 ## Documentation
 
 | Doc | Contents |
 |-----|----------|
-| [docs/README.md](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/README.md) | Overview + quick start |
-| [docs/QUICKSTART.md](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/QUICKSTART.md) | Real-label first distillation |
-| [docs/TROUBLESHOOTING.md](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/TROUBLESHOOTING.md) | Common failures and exact fixes |
-| [docs/PIPELINE.md](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/PIPELINE.md) | 4-stage pipeline walkthrough |
-| [docs/CLI_REFERENCE.md](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/CLI_REFERENCE.md) | Every command |
-| [docs/CONFIGURATION.md](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/CONFIGURATION.md) | YAML + `FORGE_*` env vars |
-| [docs/EVALUATION.md](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/EVALUATION.md) | VLA benchmark guide |
-| [docs/DEPLOYMENT.md](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/DEPLOYMENT.md) | Edge deployment |
-| [docs/HYPERPARAMETER_GUIDE.md](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/HYPERPARAMETER_GUIDE.md) | Auto-HP (Optuna) + tuning |
+| [docs/README.md](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/README.md) | Overview + quick start |
+| [docs/QUICKSTART.md](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/QUICKSTART.md) | Real-label first distillation |
+| [docs/TROUBLESHOOTING.md](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/TROUBLESHOOTING.md) | Common failures and exact fixes |
+| [docs/PIPELINE.md](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/PIPELINE.md) | 4-stage pipeline walkthrough |
+| [docs/CLI_REFERENCE.md](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/CLI_REFERENCE.md) | Every command |
+| [docs/CONFIGURATION.md](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/CONFIGURATION.md) | YAML + `FORGE_*` env vars |
+| [docs/EVALUATION.md](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/EVALUATION.md) | VLA benchmark guide |
+| [docs/DEPLOYMENT.md](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/DEPLOYMENT.md) | Edge deployment |
+| [docs/HYPERPARAMETER_GUIDE.md](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/HYPERPARAMETER_GUIDE.md) | Auto-HP (Optuna) + tuning |
 
 ## Development
 
@@ -194,7 +193,7 @@ uv run pytest tests/ -m "not gpu"
 
 PRs target `develop`; `main` is release-only. Public usage and architecture documentation
 live in
-[`docs/`](https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline/blob/main/docs/README.md).
+[`docs/`](https://github.com/RobotFlow-Labs/anima-forge/blob/main/docs/README.md).
 
 ## License
 

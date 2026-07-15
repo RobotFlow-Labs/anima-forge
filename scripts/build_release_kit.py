@@ -285,7 +285,7 @@ def render_release_kit() -> dict[str, str]:
             "",
             "```sh",
             "curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/"
-            "anima-forge-distillation-pipeline/main/install.sh | sh",
+            "anima-forge/main/install.sh | sh",
             "forge doctor",
             "forge quickstart --yes",
             "```",
@@ -320,9 +320,9 @@ def render_release_kit() -> dict[str, str]:
             "",
             "## Links",
             "",
-            "- Repository: https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline",
+            "- Repository: https://github.com/RobotFlow-Labs/anima-forge",
             "- Install: `curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/"
-            "anima-forge-distillation-pipeline/main/install.sh | sh`",
+            "anima-forge/main/install.sh | sh`",
             "",
         ]
     )

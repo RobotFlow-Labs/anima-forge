@@ -4,7 +4,7 @@
 set -eu
 
 PACKAGE_NAME="anima-forge"
-REPOSITORY_URL="https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline"
+REPOSITORY_URL="https://github.com/RobotFlow-Labs/anima-forge"
 PYTORCH_CPU_INDEX="https://download.pytorch.org/whl/cpu"
 BACKEND=${FORGE_INSTALL_BACKEND:-uv}
 DEVICE=${FORGE_INSTALL_DEVICE:-auto}

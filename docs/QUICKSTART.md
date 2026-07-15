@@ -6,7 +6,7 @@ weights or labels with random data.
 ## 1. Install and inspect the machine
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge-distillation-pipeline/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge/main/install.sh | sh
 forge doctor
 ```
 
@@ -16,7 +16,7 @@ autodetects CUDA on Linux and uses the CPU build on macOS. Useful controls inclu
 `--uninstall`. Pipe flags with `sh -s --`, for example:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge-distillation-pipeline/main/install.sh \
+curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge/main/install.sh \
   | sh -s -- --cpu --version 3.0.1
 ```
 
@@ -27,7 +27,7 @@ FORGE runtime dependency set is still installed.
 The equivalent Windows CPU installer is:
 
 ```powershell
-irm https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge-distillation-pipeline/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge/main/install.ps1 | iex
 ```
 
 Manual alternative:

@@ -15,7 +15,7 @@ Unfinished variants are deliberately omitted.
 ## Start
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge-distillation-pipeline/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/RobotFlow-Labs/anima-forge/main/install.sh | sh
 forge doctor
 forge quickstart --yes
 ```

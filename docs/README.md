@@ -59,7 +59,7 @@ a hard-coded list.
 ## Source development
 
 ```bash
-git clone https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline.git forge
+git clone https://github.com/RobotFlow-Labs/anima-forge.git forge
 cd forge
 uv sync --locked --group dev
 uv run forge doctor

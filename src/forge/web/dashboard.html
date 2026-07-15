@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORGE COMMAND CENTER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --orange: #FF3B00;
+            --black: #050505;
+            --offwhite: #f3f3f3;
+            --darkgray: #1A1A1A;
+            --midgray: #2A2A2A;
+            --shadow: 8px 8px 0px 0px rgba(0,0,0,1);
+            --green: #00CC66;
+            --red: #CC0000;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--black);
+            color: var(--offwhite);
+            line-height: 1.5;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(255,59,0,0.02) 50px),
+                repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(255,59,0,0.02) 50px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        h1, h2, h3, nav, .nav-link, .btn {
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* NAV */
+        .topbar {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(180deg, var(--darkgray) 0%, #111 100%);
+            border-bottom: 4px solid var(--orange);
+            padding: 0 1.5rem;
+            height: 56px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+        }
+        .topbar .logo {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.6rem;
+            color: var(--orange);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-right: 2rem;
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px rgba(255,59,0,0.3);
+        }
+        .nav-link {
+            color: #888;
+            text-decoration: none;
+            padding: 0.5rem 0.8rem;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+        }
+        .nav-link:hover, .nav-link.active {
+            border-bottom-color: var(--orange);
+            color: var(--orange);
+        }
+        .topbar-status {
+            margin-left: auto;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.7rem;
+            color: #666;
+        }
+        .indicator {
+            width: 8px; height: 8px;
+            display: inline-block;
+        }
+        .indicator.on { background: var(--green); box-shadow: 0 0 8px var(--green); }
+        .indicator.off { background: var(--red); box-shadow: 0 0 8px var(--red); }
+
+        /* MAIN */
+        .main { margin-top: 56px; padding: 2rem; position: relative; z-index: 1; max-width: 1400px; margin-left: auto; margin-right: auto; }
+
+        /* CARDS */
+        .card {
+            background: var(--darkgray);
+            border: 2px solid var(--midgray);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        .card h2 {
+            color: var(--orange);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: 3px;
+            border-bottom: 2px solid var(--orange);
+            padding-bottom: 0.5rem;
+        }
+        .card h2::before {
+            content: '//';
+            margin-right: 0.5rem;
+            color: #444;
+        }
+
+        /* GRID */
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        @media (max-width: 900px) {
+            .grid-4, .grid-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* METRIC BOX */
+        .metric-box {
+            background: var(--black);
+            border: 2px solid var(--midgray);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-box::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--orange);
+            opacity: 0.4;
+        }
+        .metric-box .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--orange);
+            font-family: 'Oswald', sans-serif;
+            line-height: 1;
+            text-shadow: 0 0 30px rgba(255,59,0,0.15);
+        }
+        .metric-box .label {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 300;
+            font-size: 0.65rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 0.5rem;
+        }
+
+        /* BTN */
+        .btn {
+            background: var(--orange);
+            color: var(--black);
+            border: 2px solid var(--orange);
+            padding: 0.7rem 2rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            letter-spacing: 2px;
+            font-weight: 700;
+            transition: all 0.15s;
+        }
+        .btn:hover { background: #E03300; box-shadow: 0 0 20px rgba(255,59,0,0.3); }
+        .btn-outline {
+            background: transparent;
+            color: var(--orange);
+        }
+        .btn-outline:hover { background: var(--orange); color: var(--black); }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 0.7rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--midgray);
+            font-size: 0.8rem;
+        }
+        th {
+            color: var(--orange);
+            text-transform: uppercase;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            border-bottom: 2px solid var(--orange);
+        }
+        tr:hover td { background: rgba(255,59,0,0.03); }
+
+        /* PIPELINE */
+        .pipeline {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin: 1.5rem 0;
+        }
+        .pipeline-step {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid var(--midgray);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 1px;
+            flex: 1;
+            text-align: center;
+        }
+        .pipeline-step.done { border-color: var(--green); color: var(--green); background: rgba(0,204,102,0.05); }
+        .pipeline-step.active { border-color: var(--orange); color: var(--orange); background: rgba(255,59,0,0.05); }
+        .pipeline-arrow { color: var(--orange); font-size: 1.2rem; padding: 0 0.3rem; }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: var(--darkgray);
+            border: 2px solid var(--orange);
+            border-left: 4px solid var(--orange);
+            padding: 1rem 1.5rem;
+            font-size: 0.8rem;
+            z-index: 200;
+            display: none;
+            box-shadow: var(--shadow);
+        }
+
+        /* PAGE HIDDEN */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* CODE BLOCK */
+        .code-block {
+            background: var(--black);
+            border: 1px solid var(--midgray);
+            padding: 1.5rem;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border: 1px solid;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 1px;
+        }
+        .tag-green { border-color: var(--green); color: var(--green); }
+        .tag-orange { border-color: var(--orange); color: var(--orange); }
+        .tag-gray { border-color: #444; color: #666; }
+
+        /* FORM ELEMENTS */
+        select, input[type="text"] {
+            background: var(--black);
+            color: var(--offwhite);
+            border: 2px solid var(--midgray);
+            padding: 0.5rem 0.8rem;
+            width: 100%;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            transition: border-color 0.15s;
+        }
+        select:focus, input[type="text"]:focus {
+            border-color: var(--orange);
+            outline: none;
+        }
+        .form-label {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 300;
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="logo">FORGE</div>
+    <a class="nav-link active" href="#/" data-route="/">STATUS</a>
+    <a class="nav-link" href="#/teachers" data-route="/teachers">TEACHERS</a>
+    <a class="nav-link" href="#/models" data-route="/models">MODELS</a>
+    <a class="nav-link" href="#/distill" data-route="/distill">DISTILL</a>
+    <a class="nav-link" href="#/compress" data-route="/compress">COMPRESS</a>
+    <a class="nav-link" href="#/benchmarks" data-route="/benchmarks">BENCHMARKS</a>
+    <a class="nav-link" href="#/robots" data-route="/robots">ROBOTS</a>
+    <a class="nav-link" href="#/inference" data-route="/inference">INFERENCE</a>
+    <a class="nav-link" href="#/export" data-route="/export">EXPORT</a>
+    <a class="nav-link" href="#/eval" data-route="/eval">EVAL</a>
+    <a class="nav-link" href="#/experiments" data-route="/experiments">EXPERIMENTS</a>
+    <div class="topbar-status">
+        <span><span class="indicator on" id="ind-api"></span> API</span>
+        <span><span class="indicator off" id="ind-gpu"></span> GPU</span>
+        <span id="version-badge">v3.0.1</span>
+    </div>
+</div>
+
+<div class="main">
+
+<!-- STATUS PAGE -->
+<div class="page active" id="page-status">
+    <div class="grid-4" id="status-metrics">
+        <div class="metric-box"><div class="value" id="m-gpu">--</div><div class="label">GPU</div></div>
+        <div class="metric-box"><div class="value" id="m-vram">--</div><div class="label">VRAM</div></div>
+        <div class="metric-box"><div class="value" id="m-disk">--</div><div class="label">DISK FREE</div></div>
+        <div class="metric-box"><div class="value" id="m-uptime">--</div><div class="label">UPTIME</div></div>
+    </div>
+
+    <div class="card">
+        <h2>PIPELINE</h2>
+        <div class="pipeline">
+            <div class="pipeline-step done">LABELS</div>
+            <span class="pipeline-arrow">→</span>
+            <div class="pipeline-step done">DISTILL</div>
+            <span class="pipeline-arrow">→</span>
+            <div class="pipeline-step">COMPRESS</div>
+            <span class="pipeline-arrow">→</span>
+            <div class="pipeline-step">EXPORT</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>QUICK ACTIONS</h2>
+        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+            <button class="btn" onclick="showCommand('forge benchmark run --checkpoint &lt;checkpoint.pt&gt;')">BENCHMARK COMMAND</button>
+            <button class="btn btn-outline" onclick="window.open('/api/demo/report','_blank')">VIEW REPORT</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>ACTIVE JOBS</h2>
+        <div id="active-jobs">No active jobs.</div>
+    </div>
+</div>
+
+<!-- TEACHERS PAGE -->
+<div class="page" id="page-teachers">
+    <div class="card">
+        <h2>TEACHER REGISTRY</h2>
+        <div id="teachers-grid" class="grid-3">
+            <div class="metric-box"><div class="label">Loading the live teacher registry…</div></div>
+        </div>
+    </div>
+    <div class="card">
+        <h2>MULTI-TEACHER ROUTING</h2>
+        <div class="grid-3">
+            <div class="metric-box"><div class="value" id="teacher-count">--</div><div class="label">Teachers Total</div></div>
+            <div class="metric-box"><div class="value" style="color:var(--green);">REAL</div><div class="label">Registry Source</div></div>
+            <div class="metric-box"><div class="value">LOCAL</div><div class="label">Weight Loading</div></div>
+        </div>
+        <div style="margin-top:1.5rem;font-size:0.75rem;color:#666;">
+            Teacher placement depends on the selected fleet and dtype. The cards above are loaded from the live registry.
+        </div>
+    </div>
+</div>
+
+<!-- MODELS PAGE -->
+<div class="page" id="page-models">
+    <div class="card">
+        <h2>STUDENT MODELS</h2>
+        <table id="models-table">
+            <thead><tr><th>Name</th><th>Size</th><th>Actions</th></tr></thead>
+            <tbody id="models-tbody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- DISTILL PAGE -->
+<div class="page" id="page-distill">
+    <div class="card">
+        <h2>DISTILLATION</h2>
+        <div class="grid-2">
+            <div>
+                <p class="form-label">Variant</p>
+                <select id="distill-variant">
+                    <option>nano</option><option>small</option><option>micro</option><option>medium</option>
+                </select>
+            </div>
+            <div>
+                <p class="form-label">Action Head</p>
+                <select id="distill-head">
+                    <option>diffusion</option><option>flow</option><option>chunk</option><option>consistency</option>
+                </select>
+            </div>
+        </div>
+        <div style="margin-top:1.5rem;">
+            <button class="btn" onclick="showDistillCommand()">SHOW TRAIN COMMAND</button>
+            <button class="btn btn-outline" style="margin-left:0.5rem;" onclick="showCommand('forge train stop &lt;run-id&gt;')">SHOW STOP COMMAND</button>
+        </div>
+    </div>
+    <div class="card">
+        <h2>TRAINING STATUS</h2>
+        <div id="train-status" class="grid-3">
+            <div class="metric-box"><div class="value" id="t-step">0</div><div class="label">STEP</div></div>
+            <div class="metric-box"><div class="value" id="t-loss">--</div><div class="label">LOSS</div></div>
+            <div class="metric-box"><div class="value" id="t-phase">IDLE</div><div class="label">PHASE</div></div>
+        </div>
+    </div>
+    <div class="card">
+        <h2>RECORDED TRAINING LOSS</h2>
+        <canvas id="loss-chart" width="800" height="300" style="width:100%;height:300px;background:var(--black);border:1px solid var(--midgray);"></canvas>
+        <div id="loss-chart-evidence" style="margin-top:1rem;font-size:0.7rem;color:#888;">Loading recorded benchmark evidence…</div>
+    </div>
+    <div class="card">
+        <h2>RECORDED LOSS REDUCTION</h2>
+        <canvas id="pipeline-loss-chart" width="800" height="250" style="width:100%;height:250px;background:var(--black);border:1px solid var(--midgray);"></canvas>
+        <div id="pipeline-loss-evidence" style="margin-top:1rem;font-size:0.7rem;color:#888;">Loading recorded benchmark evidence…</div>
+    </div>
+</div>
+
+<!-- COMPRESS PAGE -->
+<div class="page" id="page-compress">
+    <div class="card">
+        <h2>COMPRESSION</h2>
+        <div class="grid-2">
+            <div>
+                <p class="form-label">Target Bits</p>
+                <select>
+                    <option>4</option><option>8</option><option>2</option>
+                </select>
+            </div>
+            <div>
+                <p class="form-label">Action Head Bits</p>
+                <select>
+                    <option>8</option><option>4</option>
+                </select>
+            </div>
+        </div>
+        <div style="margin-top:1.5rem;">
+            <button class="btn" onclick="showCommand('forge pipeline --stage compress --checkpoint &lt;checkpoint.pt&gt; --data-dir &lt;real-label-root&gt; --output-dir &lt;run&gt;')">SHOW COMPRESS COMMAND</button>
+        </div>
+    </div>
+</div>
+
+<!-- BENCHMARKS PAGE -->
+<div class="page" id="page-benchmarks">
+    <div class="card">
+        <h2>BENCHMARK SUITE</h2>
+        <button class="btn" onclick="showCommand('forge benchmark run --checkpoint &lt;checkpoint.pt&gt; --data-dir &lt;real-lerobot-dataset&gt; --instruction &quot;&lt;real-task&gt;&quot;')">SHOW BENCHMARK COMMAND</button>
+        <div id="benchmark-results" style="margin-top:1.5rem;"></div>
+    </div>
+    <div class="card">
+        <h2>HISTORY</h2>
+        <table>
+            <thead><tr><th>ID</th><th>Model</th><th>Latency</th><th>Throughput</th><th>Compression</th></tr></thead>
+            <tbody id="benchmark-history"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ROBOTS PAGE -->
+<div class="page" id="page-robots">
+    <div class="card">
+        <h2>ROBOT EMBODIMENTS</h2>
+        <div id="robots-grid" class="grid-3"></div>
+    </div>
+</div>
+
+<!-- INFERENCE PAGE -->
+<div class="page" id="page-inference">
+    <div class="card">
+        <h2>INFERENCE</h2>
+        <div class="grid-2">
+            <div>
+                <p class="form-label">Instruction</p>
+                <input id="infer-instruction" type="text" placeholder="pick up the red block">
+            </div>
+            <div style="display:flex;align-items:end;">
+                <button class="btn" onclick="showToast('Prediction not available — load a model first')">PREDICT</button>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <h2>ASYNC ENGINE</h2>
+        <div class="grid-3">
+            <div class="metric-box"><div class="value" id="rt-running">OFF</div><div class="label">STATUS</div></div>
+            <div class="metric-box"><div class="value" id="rt-frames">0</div><div class="label">FRAMES</div></div>
+            <div class="metric-box"><div class="value" id="rt-actions">0</div><div class="label">ACTIONS</div></div>
+        </div>
+        <div style="margin-top:1rem;">
+            <button class="btn" onclick="showCommand('forge serve --checkpoint &lt;checkpoint.pt&gt;')">SHOW START COMMAND</button>
+            <button class="btn btn-outline" style="margin-left:0.5rem;" onclick="showCommand('forge train stop &lt;run-id&gt;')">SHOW STOP COMMAND</button>
+        </div>
+    </div>
+</div>
+
+<!-- EXPORT PAGE -->
+<div class="page" id="page-export">
+    <div class="card">
+        <h2>EXPORT</h2>
+        <div class="grid-4">
+            <div class="metric-box" style="cursor:pointer;" onclick="showToast('TensorRT export — load model first')">
+                <div class="value" style="font-size:1.2rem;">TENSORRT</div>
+                <div class="label">Jetson / L4</div>
+            </div>
+            <div class="metric-box" style="cursor:pointer;" onclick="showToast('CoreML export — load model first')">
+                <div class="value" style="font-size:1.2rem;">COREML</div>
+                <div class="label">Apple Neural Engine</div>
+            </div>
+            <div class="metric-box" style="cursor:pointer;" onclick="showToast('MLX export — load model first')">
+                <div class="value" style="font-size:1.2rem;">MLX</div>
+                <div class="label">Apple Silicon</div>
+            </div>
+            <div class="metric-box" style="cursor:pointer;" onclick="showToast('ONNX export — load model first')">
+                <div class="value" style="font-size:1.2rem;">ONNX</div>
+                <div class="label">Universal</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- EVAL PAGE (PRD-32) -->
+<div class="page" id="page-eval">
+    <div class="grid-4" id="eval-summary-metrics">
+        <div class="metric-box"><div class="value" id="eval-total">--</div><div class="label">EVALUATIONS</div></div>
+        <div class="metric-box"><div class="value" id="eval-best-sr">--</div><div class="label">BEST SUCCESS RATE</div></div>
+        <div class="metric-box"><div class="value" id="eval-best-bench">--</div><div class="label">BEST BENCHMARK</div></div>
+        <div class="metric-box"><div class="value" id="eval-latency">--</div><div class="label">LATENCY (P50)</div></div>
+    </div>
+    <div class="card">
+        <h2>VLA EVALUATION RESULTS</h2>
+        <p style="font-size:0.75rem;color:#888;margin-bottom:1rem;">Task success rates from vla-evaluation-harness (LIBERO, SimplerEnv, VLABench)</p>
+        <table style="width:100%;">
+            <thead><tr><th>BENCHMARK</th><th>SUCCESS RATE</th><th>TASKS</th><th>EPISODES</th><th>LATENCY</th><th>VARIANT</th><th>TIMESTAMP</th></tr></thead>
+            <tbody id="eval-results-tbody"></tbody>
+        </table>
+        <div id="eval-empty" style="display:none;color:#888;font-size:0.8rem;padding:1rem;">
+            No evaluation results found. Run: <code>forge eval run libero --checkpoint &lt;path&gt;</code>
+        </div>
+    </div>
+</div>
+
+<!-- EXPERIMENTS PAGE -->
+<div class="page" id="page-experiments">
+    <div class="grid-4" id="exp-summary-metrics">
+        <div class="metric-box"><div class="value" id="exp-completed">--</div><div class="label">COMPLETED</div></div>
+        <div class="metric-box"><div class="value" id="exp-pruned">--</div><div class="label">PRUNED</div></div>
+        <div class="metric-box"><div class="value" id="exp-gpu-saved">--</div><div class="label">GPU TIME SAVED</div></div>
+        <div class="metric-box"><div class="value" id="exp-best-score">--</div><div class="label">BEST SCORE</div></div>
+    </div>
+    <div class="card">
+        <h2>BEST CONFIGURATION</h2>
+        <div id="exp-best-config" style="font-size:0.8rem;color:#888;">No experiments found. Run: forge hyperparam auto --trials 30</div>
+    </div>
+    <div class="card">
+        <h2>AUTO-HP TRIALS</h2>
+        <div id="exp-wandb-link" style="margin-bottom:1rem;display:none;">
+            <a class="btn btn-outline" style="font-size:0.7rem;padding:0.3rem 0.8rem;text-decoration:none;" target="_blank" id="exp-wandb-url">OPEN W&B DASHBOARD ↗</a>
+        </div>
+        <table style="width:100%;">
+            <thead><tr><th>TRIAL</th><th>STATUS</th><th>SCORE</th><th>FPS</th><th>LOSS↓</th><th>COMPRESS</th><th>LORA</th><th>HEAD</th><th>LR</th></tr></thead>
+            <tbody id="exp-trials-tbody"></tbody>
+        </table>
+    </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SANITIZE ──
+function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+}
+
+// ── API CLIENT ──
+const API = {
+    async get(path) {
+        const r = await fetch(path);
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.hint || data.error || `Request failed: ${r.status}`);
+        return data;
+    },
+    async post(path, body) {
+        const r = await fetch(path, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: body ? JSON.stringify(body) : undefined
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.hint || data.error || `Request failed: ${r.status}`);
+        return data;
+    }
+};
+
+// ── ROUTER ──
+const routes = {
+    '/': 'page-status',
+    '/teachers': 'page-teachers',
+    '/models': 'page-models',
+    '/distill': 'page-distill',
+    '/compress': 'page-compress',
+    '/benchmarks': 'page-benchmarks',
+    '/robots': 'page-robots',
+    '/inference': 'page-inference',
+    '/export': 'page-export',
+    '/eval': 'page-eval',
+    '/experiments': 'page-experiments'
+};
+
+function navigate() {
+    const hash = location.hash.replace('#', '') || '/';
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+
+    const pageId = routes[hash] || 'page-status';
+    const el = document.getElementById(pageId);
+    if (el) el.classList.add('active');
+
+    const link = document.querySelector(`.nav-link[data-route="${hash}"]`);
+    if (link) link.classList.add('active');
+
+    if (hash === '/') loadStatus();
+    if (hash === '/teachers') loadTeachers();
+    if (hash === '/models') loadModels();
+    if (hash === '/distill') loadTrainStatus();
+    if (hash === '/robots') loadRobots();
+    if (hash === '/benchmarks') loadBenchmarks();
+    if (hash === '/inference') loadRuntimeStatus();
+    if (hash === '/eval') loadEval();
+    if (hash === '/experiments') loadExperiments();
+}
+
+window.addEventListener('hashchange', navigate);
+window.addEventListener('load', navigate);
+
+// ── TOAST ──
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 3000);
+}
+
+function showCommand(command) {
+    showToast('Run: ' + command);
+}
+
+function showDistillCommand() {
+    const variant = document.getElementById('distill-variant').value;
+    showCommand(`forge pipeline --config configs/forge_${variant}.yaml --stage distill --data-dir <labels> --output-dir <run>`);
+}
+
+// ── FORMATTERS ──
+function fmtDuration(s) {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    return h > 0 ? h + 'H ' + m + 'M' : m + 'M';
+}
+function fmtGB(n) { return n.toFixed(1) + ' GB'; }
+
+// ── PAGE LOADERS ──
+async function loadStatus() {
+    try {
+        const s = await API.get('/api/status');
+        document.getElementById('m-gpu').textContent = s.gpu || 'N/A';
+        document.getElementById('m-vram').textContent = fmtGB(s.vram_used_gb || 0) + ' / ' + fmtGB(s.vram_total_gb || 0);
+        document.getElementById('m-disk').textContent = fmtGB(s.disk_free_gb || 0);
+        document.getElementById('m-uptime').textContent = fmtDuration(s.uptime_s || 0);
+        document.getElementById('ind-gpu').className = 'indicator ' + (s.gpu && s.gpu !== 'N/A' ? 'on' : 'off');
+        document.getElementById('ind-api').className = 'indicator on';
+        document.getElementById('version-badge').textContent = 'v' + s.version;
+        document.getElementById('active-jobs').textContent = s.active_jobs ? `${s.active_jobs} active job(s).` : 'No active jobs.';
+    } catch(e) {
+        document.getElementById('ind-api').className = 'indicator off';
+    }
+}
+
+async function loadTeachers() {
+    const teachers = await API.get('/api/teachers');
+    const grid = document.getElementById('teachers-grid');
+    if (!teachers.length) {
+        document.getElementById('teacher-count').textContent = '0';
+        grid.innerHTML = '<p style="color:#888;">No teachers registered.</p>';
+        return;
+    }
+    document.getElementById('teacher-count').textContent = teachers.length;
+    grid.innerHTML = teachers.map(t => `
+        <div class="card" style="margin-bottom:0;">
+            <h2 style="font-size:0.9rem;">${esc(t.name)}</h2>
+            <p style="font-size:0.75rem;color:#888;">${esc(t.architecture)}</p>
+            <p style="font-size:0.85rem;margin:0.5rem 0;">${t.params_b.toFixed(1)}B params</p>
+            <span class="tag ${t.loaded ? 'tag-green' : 'tag-gray'}">${t.loaded ? 'LOADED' : 'UNLOADED'}</span>
+            <span class="tag ${t.supports_chunking ? 'tag-green' : 'tag-gray'}">${t.supports_chunking ? 'CHUNKING' : 'NO CHUNK'}</span>
+        </div>
+    `).join('');
+}
+
+async function loadModels() {
+    const models = await API.get('/api/models');
+    const tbody = document.getElementById('models-tbody');
+    if (!models.length) {
+        tbody.innerHTML = '<tr><td colspan="3" style="color:#888;">No checkpoints in the configured output directory.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = models.map(model => `
+        <tr><td>${esc(model.name)}</td><td>${model.size_mb.toFixed(1)} MB</td><td>Use forge serve --checkpoint</td></tr>
+    `).join('');
+}
+
+async function loadTrainStatus() {
+    const status = await API.get('/api/train/status');
+    document.getElementById('t-step').textContent = status.step || 0;
+    document.getElementById('t-loss').textContent = status.running ? Number(status.loss).toFixed(4) : '--';
+    document.getElementById('t-phase').textContent = status.running ? 'RUNNING' : 'IDLE';
+}
+
+async function loadRuntimeStatus() {
+    const status = await API.get('/api/runtime/status');
+    document.getElementById('rt-running').textContent = status.is_running ? 'ON' : 'OFF';
+    document.getElementById('rt-frames').textContent = status.frames_processed;
+    document.getElementById('rt-actions').textContent = status.actions_served;
+}
+
+async function loadRobots() {
+    const robots = await API.get('/api/embodiments');
+    const grid = document.getElementById('robots-grid');
+    if (!robots.length) {
+        grid.innerHTML = '<p style="color:#888;">No embodiments registered.</p>';
+        return;
+    }
+    grid.innerHTML = robots.map(r => `
+        <div class="card" style="margin-bottom:0;">
+            <h2 style="font-size:0.9rem;">${esc(r.name)}</h2>
+            <p style="font-size:1.5rem;color:var(--orange);font-family:'Oswald',sans-serif;">${r.dof}-DOF</p>
+            <p style="font-size:0.75rem;color:#888;">Action dim: ${r.action_dim}</p>
+            <button class="btn btn-outline" style="margin-top:0.5rem;font-size:0.7rem;padding:0.3rem 0.8rem;"
+                onclick="API.get('/api/embodiments/${esc(r.name)}/config').then(d=>{document.getElementById('robot-config-out').textContent=d.yaml;showToast('Config generated for ${esc(r.name)}')})">
+                GENERATE CONFIG
+            </button>
+        </div>
+    `).join('');
+    grid.innerHTML += '<div class="code-block" id="robot-config-out" style="grid-column:1/-1;min-height:3rem;color:#888;">Select a robot to generate config.</div>';
+}
+
+async function loadBenchmarks() {
+    const history = await API.get('/api/benchmarks');
+    const tbody = document.getElementById('benchmark-history');
+    if (!history.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="color:#888;">No benchmark runs found. Use the command above with a trained checkpoint.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = history.map(b => `
+        <tr>
+            <td>${b.id || '--'}</td>
+            <td>${b.model_name || '--'}</td>
+            <td>${(b.latency?.mean_ms || 0).toFixed(1)}ms</td>
+            <td>${(b.throughput?.actions_per_second || 0).toFixed(0)} act/s</td>
+            <td>${(b.compression?.compression_ratio || 0).toFixed(0)}x</td>
+        </tr>
+    `).join('');
+}
+
+// ── LOSS CHART RENDERER ──
+function drawLossChart(canvasId, datasets, opts = {}) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    const W = rect.width, H = rect.height;
+    const pad = { t: 20, r: 20, b: 35, l: 55 };
+    const plotW = W - pad.l - pad.r;
+    const plotH = H - pad.t - pad.b;
+
+    // Find data ranges
+    let maxX = 0, maxY = 0, minY = Infinity;
+    datasets.forEach(ds => {
+        maxX = Math.max(maxX, ds.data.length);
+        ds.data.forEach(v => { maxY = Math.max(maxY, v); minY = Math.min(minY, v); });
+    });
+    if (opts.minY !== undefined) minY = opts.minY;
+    const rangeY = maxY - minY || 1;
+
+    // Clear
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid lines
+    ctx.strokeStyle = '#1A1A1A';
+    ctx.lineWidth = 1;
+    const nGridY = 5;
+    for (let i = 0; i <= nGridY; i++) {
+        const y = pad.t + (i / nGridY) * plotH;
+        ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+        // Y labels
+        const val = maxY - (i / nGridY) * rangeY;
+        ctx.fillStyle = '#555';
+        ctx.font = '10px "JetBrains Mono"';
+        ctx.textAlign = 'right';
+        ctx.fillText(val.toFixed(1), pad.l - 8, y + 3);
+    }
+    // X axis labels
+    ctx.fillStyle = '#555';
+    ctx.textAlign = 'center';
+    ctx.fillText('0', pad.l, H - pad.b + 18);
+    ctx.fillText(String(maxX), W - pad.r, H - pad.b + 18);
+    ctx.fillText('steps', pad.l + plotW / 2, H - pad.b + 28);
+
+    // Draw each dataset
+    datasets.forEach(ds => {
+        ctx.strokeStyle = ds.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ds.data.forEach((v, i) => {
+            const x = pad.l + (i / (ds.data.length - 1 || 1)) * plotW;
+            const y = pad.t + ((maxY - v) / rangeY) * plotH;
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        // Glow effect
+        ctx.strokeStyle = ds.color;
+        ctx.globalAlpha = 0.15;
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ds.data.forEach((v, i) => {
+            const x = pad.l + (i / (ds.data.length - 1 || 1)) * plotW;
+            const y = pad.t + ((maxY - v) / rangeY) * plotH;
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 2;
+
+        // End dot
+        const lastX = pad.l + plotW;
+        const lastY = pad.t + ((maxY - ds.data[ds.data.length - 1]) / rangeY) * plotH;
+        ctx.fillStyle = ds.color;
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    // Border
+    ctx.strokeStyle = '#2A2A2A';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(pad.l, pad.t, plotW, plotH);
+}
+
+// ── BENCHMARK LOSS BAR CHART ──
+function drawPipelineBars(canvasId, pipelines) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    const W = rect.width, H = rect.height;
+    const pad = { t: 20, r: 20, b: 40, l: 160 };
+
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(0, 0, W, H);
+
+    const barH = 28;
+    const gap = 8;
+    const maxPct = 100;
+    const barArea = W - pad.l - pad.r;
+
+    pipelines.forEach((p, i) => {
+        const y = pad.t + i * (barH + gap);
+
+        // Label
+        ctx.fillStyle = '#888';
+        ctx.font = '11px "JetBrains Mono"';
+        ctx.textAlign = 'right';
+        ctx.fillText(p.name, pad.l - 10, y + barH / 2 + 4);
+
+        // Track
+        ctx.fillStyle = '#1A1A1A';
+        ctx.fillRect(pad.l, y, barArea, barH);
+
+        // Fill
+        const fillW = (p.pct / maxPct) * barArea;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(pad.l, y, fillW, barH);
+
+        // Glow
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = 0.1;
+        ctx.fillRect(pad.l, y, fillW, barH);
+        ctx.globalAlpha = 1;
+
+        // Value text
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px "Oswald"';
+        ctx.textAlign = 'left';
+        ctx.fillText(p.pct.toFixed(1) + '% (' + p.start.toFixed(1) + ' → ' + p.end.toFixed(1) + ')', pad.l + fillW + 8, y + barH / 2 + 4);
+    });
+
+    // X axis
+    ctx.fillStyle = '#555';
+    ctx.font = '10px "JetBrains Mono"';
+    ctx.textAlign = 'center';
+    ctx.fillText('loss reduction %', pad.l + barArea / 2, H - 8);
+}
+
+function benchmarkLosses(record) {
+    const candidates = [record.losses, record.loss_history, record.training?.losses, record.metrics?.losses];
+    const values = candidates.find(value => Array.isArray(value));
+    if (!values) return [];
+    return values.map(Number).filter(Number.isFinite);
+}
+
+function clearChart(canvasId, message) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(0, 0, rect.width, rect.height);
+    ctx.fillStyle = '#777';
+    ctx.font = '12px "JetBrains Mono"';
+    ctx.textAlign = 'center';
+    ctx.fillText(message, rect.width / 2, rect.height / 2);
+}
+
+// ── LOAD CHARTS WHEN DISTILL PAGE OPENS ──
+async function loadCharts() {
+    const colors = ['#FF3B00', '#00CC66', '#0088FF', '#CC66FF', '#FFAA00'];
+    let history = [];
+    try {
+        history = await API.get('/api/benchmarks');
+    } catch (_) {
+        history = [];
+    }
+    const evidence = history.map((record, index) => ({
+        record,
+        data: benchmarkLosses(record),
+        color: colors[index % colors.length]
+    })).filter(item => item.data.length > 1).slice(-5);
+
+    const lossNote = document.getElementById('loss-chart-evidence');
+    const reductionNote = document.getElementById('pipeline-loss-evidence');
+    if (!evidence.length) {
+        const message = 'No recorded loss evidence. Run forge benchmark suite 03 or 13.';
+        clearChart('loss-chart', message);
+        clearChart('pipeline-loss-chart', message);
+        lossNote.textContent = message;
+        reductionNote.textContent = 'No measured reduction is displayed until a benchmark record supplies finite losses.';
+        return;
+    }
+
+    drawLossChart('loss-chart', evidence.map(item => ({color: item.color, data: smooth(item.data, 0.4)})));
+    const pipelines = evidence.map((item, index) => {
+        const start = item.data[0];
+        const end = item.data[item.data.length - 1];
+        return {
+            name: item.record.model_name || item.record.model || item.record.benchmark || `run-${index + 1}`,
+            start,
+            end,
+            pct: start === 0 ? 0 : Math.max(0, (start - end) / Math.abs(start) * 100),
+            color: item.color
+        };
+    });
+    drawPipelineBars('pipeline-loss-chart', pipelines);
+    lossNote.textContent = `${evidence.length} benchmark record(s) with finite loss histories.`;
+    reductionNote.textContent = 'Computed from the first and final finite loss in each recorded run.';
+}
+
+// Smoothing helper (exponential moving average)
+function smooth(data, alpha) {
+    const out = [data[0]];
+    for (let i = 1; i < data.length; i++) out.push(alpha * data[i] + (1 - alpha) * out[i - 1]);
+    return out;
+}
+
+// ── EVAL PAGE LOADER (PRD-32) ──
+async function loadEval() {
+    try {
+        const results = await API.get('/api/eval/results');
+        const tbody = document.getElementById('eval-results-tbody');
+        const empty = document.getElementById('eval-empty');
+
+        if (!results || !results.length) {
+            tbody.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+
+        // Summary metrics
+        document.getElementById('eval-total').textContent = results.length;
+        let bestSR = 0, bestBench = '--';
+        let totalLatency = 0, latencyCount = 0;
+        results.forEach(r => {
+            if (r.success_rate > bestSR) { bestSR = r.success_rate; bestBench = r.benchmark; }
+            if (r.latency_p50_ms > 0) { totalLatency += r.latency_p50_ms; latencyCount++; }
+        });
+        document.getElementById('eval-best-sr').textContent = (bestSR * 100).toFixed(1) + '%';
+        document.getElementById('eval-best-bench').textContent = bestBench.toUpperCase();
+        document.getElementById('eval-latency').textContent = latencyCount > 0
+            ? (totalLatency / latencyCount).toFixed(1) + 'ms' : '--';
+
+        // Table
+        tbody.innerHTML = results.map(r => `<tr>
+            <td>${esc(r.benchmark || '')}</td>
+            <td style="color:${r.success_rate >= 0.5 ? '#0f0' : r.success_rate >= 0.2 ? '#ff0' : '#f00'}">${(r.success_rate * 100).toFixed(1)}%</td>
+            <td>${r.tasks || '--'}</td>
+            <td>${r.episodes_per_task || '--'}</td>
+            <td>${r.latency_p50_ms ? r.latency_p50_ms.toFixed(1) + 'ms' : '--'}</td>
+            <td>${esc(r.student_variant || '')}</td>
+            <td style="font-size:0.7rem;">${esc(r.timestamp || '')}</td>
+        </tr>`).join('');
+    } catch(e) {
+        console.error('Failed to load eval results:', e);
+    }
+}
+
+// ── EXPERIMENTS PAGE LOADER ──
+async function loadExperiments() {
+    try {
+        const data = await API.get('/api/experiments/auto_hp');
+        if (data.status === 'no_data' || !data.trials) {
+            document.getElementById('exp-trials-tbody').innerHTML =
+                '<tr><td colspan="9" style="color:#888;">No experiments yet. Run: forge hyperparam auto --trials 30</td></tr>';
+            return;
+        }
+        document.getElementById('exp-completed').textContent = data.completed || 0;
+        document.getElementById('exp-pruned').textContent = data.pruned || 0;
+        document.getElementById('exp-gpu-saved').textContent = (data.gpu_time_saved_pct || 0) + '%';
+        const best = data.best_trial || {};
+        document.getElementById('exp-best-score').textContent = best.score || '--';
+
+        if (best.params) {
+            const m = best.metrics || {};
+            document.getElementById('exp-best-config').innerHTML =
+                '<div class="grid-4">' +
+                '<div class="metric-box"><div class="value">' + (m.fps || '--') + '</div><div class="label">FPS</div></div>' +
+                '<div class="metric-box"><div class="value">' + (m.loss_reduction_pct || '--') + '%</div><div class="label">LOSS REDUCTION</div></div>' +
+                '<div class="metric-box"><div class="value">' + (m.compression_ratio || '--') + 'x</div><div class="label">COMPRESSION</div></div>' +
+                '<div class="metric-box"><div class="value">' + (best.params.lora_rank || '--') + '</div><div class="label">LORA RANK</div></div>' +
+                '</div>' +
+                '<div style="margin-top:1rem;font-size:0.75rem;color:#888;">' +
+                'head=' + (best.params.action_head_type || '--') +
+                ' | lr=' + (best.params.learning_rate ? best.params.learning_rate.toExponential(1) : '--') +
+                ' | batch=' + (best.params.batch_size || '--') +
+                ' | quant=' + (best.params.quant_bits || '--') + 'bit' +
+                '</div>';
+        }
+
+        if (data.wandb_project) {
+            const wbEl = document.getElementById('exp-wandb-link');
+            const entity = data.wandb_entity || '_';
+            document.getElementById('exp-wandb-url').href = 'https://wandb.ai/' + entity + '/' + data.wandb_project;
+            wbEl.style.display = 'block';
+        }
+
+        const tbody = document.getElementById('exp-trials-tbody');
+        const trials = data.trials || [];
+        if (!trials.length) {
+            tbody.innerHTML = '<tr><td colspan="9" style="color:#888;">No trials recorded.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = trials.map(t => {
+            const m = t.metrics || {};
+            const p = t.params || {};
+            const isBest = best.number !== undefined && t.number === best.number;
+            const style = isBest ? 'color:var(--green);font-weight:bold;' : '';
+            const statusColor = t.state === 'COMPLETE' ? 'var(--green)' : (t.state === 'PRUNED' ? '#FFAA00' : 'var(--red)');
+            return '<tr style="' + style + '">' +
+                '<td>' + (isBest ? '★ ' : '') + esc(String(t.number)) + '</td>' +
+                '<td style="color:' + statusColor + ';">' + esc(t.state || '--') + '</td>' +
+                '<td>' + esc(String(t.score || '--')) + '</td>' +
+                '<td>' + esc(String(m.fps || '--')) + '</td>' +
+                '<td>' + esc(String(m.loss_reduction_pct || '--')) + '%</td>' +
+                '<td>' + esc(String(m.compression_ratio || '--')) + 'x</td>' +
+                '<td>' + esc(String(p.lora_rank || '--')) + '</td>' +
+                '<td>' + esc(p.action_head_type || '--') + '</td>' +
+                '<td>' + (p.learning_rate ? esc(Number(p.learning_rate).toExponential(1)) : '--') + '</td>' +
+                '</tr>';
+        }).join('');
+    } catch(e) {
+        document.getElementById('exp-trials-tbody').innerHTML =
+            '<tr><td colspan="9" style="color:var(--red);">Error loading experiments: ' + esc(e.message) + '</td></tr>';
+    }
+}
+
+// Auto-refresh status every 10s
+setInterval(() => {
+    if (location.hash === '#/' || location.hash === '') loadStatus();
+}, 10000);
+
+// Patch navigate to load charts
+const _origNavigate = navigate;
+const _navWithCharts = function() {
+    _origNavigate();
+    const hash = location.hash.replace('#', '') || '/';
+    if (hash === '/distill') setTimeout(loadCharts, 50);
+};
+window.removeEventListener('hashchange', navigate);
+window.removeEventListener('load', navigate);
+window.addEventListener('hashchange', _navWithCharts);
+window.addEventListener('load', _navWithCharts);
+</script>
+</body>
+</html>

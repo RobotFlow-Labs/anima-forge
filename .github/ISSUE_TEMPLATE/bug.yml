@@ -1,0 +1,31 @@
+name: Bug report
+description: Report reproducible incorrect behavior
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Exact command and redacted output
+      description: Never include access tokens or private model URLs.
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: forge doctor --json
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: FORGE version or commit
+    validations:
+      required: true

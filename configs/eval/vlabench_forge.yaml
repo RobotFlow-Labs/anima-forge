@@ -1,0 +1,23 @@
+# VLABench Benchmark — FORGE Evaluation Config
+# Language-conditioned manipulation with long-horizon reasoning (MuJoCo/dm_control)
+# Used by: forge eval run vlabench --config configs/eval/vlabench_forge.yaml
+
+server:
+  url: "ws://localhost:8000"
+
+docker:
+  image: ghcr.io/allenai/vla-evaluation-harness/vlabench:latest
+
+output_dir: "./outputs/eval/vlabench"
+
+benchmarks:
+  - benchmark: "vla_eval.benchmarks.vlabench.benchmark:VLABenchBenchmark"
+    mode: sync
+    episodes_per_task: 3
+    params:
+      tasks:
+        - "select_fruit"
+        - "select_toy"
+        - "select_drink"
+      robot: "franka"
+      max_steps: 200

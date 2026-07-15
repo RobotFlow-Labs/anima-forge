@@ -1,0 +1,63 @@
+
+# Claude Code (local settings — never commit)
+# Data and models (large files — top-level only)
+# Docker
+# IDE
+# Logs
+# OS
+# Python
+# UV
+*.bin
+*.egg
+*.egg-info/
+*.engine
+*.h5
+*.hdf5
+*.log
+*.mlpackage
+*.onnx
+*.pt
+*.pth
+*.py[cod]
+*.safetensors
+*.swo
+*.swp
+*.tar
+.DS_Store
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+.env
+.idea/
+.uv/
+.venv/
+.vscode/
+/data/
+/models/*
+!/models/.gitkeep
+!/models/README.md
+/outputs/
+Thumbs.db
+__pycache__/
+build/
+dist/
+wandb/
+repositories/
+/.backup_bk/
+marketing/benchmarks/*.pt
+marketing/metrics/*.err
+old_docs/
+
+# Local release-review and operator scratch files
+/COMPATIBILITY.md.orig
+/codex-errors-to-fix.md
+/scripts/gpu_real_ops.sh
+
+# Private project documentation (kept locally, excluded from public snapshots)
+/docs/internal/
+/docs/v2/
+/docs/v3/
+/.mypy_cache/
+/.pytest_cache/
+/.ruff_cache/
+/benchmarks/**
+!/benchmarks/.gitkeep

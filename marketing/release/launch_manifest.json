@@ -1,0 +1,8 @@
+{
+  "schema": "forge.release-kit.v1",
+  "version": "3.0.1",
+  "claim_source": "README.md#how-it-works",
+  "release_validation": "pending corrected-preprocessing validation",
+  "completed_variants": [],
+  "pending_claim_policy": "Every variant is omitted until corrected-preprocessing validation completes."
+}

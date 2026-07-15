@@ -1,0 +1,19 @@
+# FORGE Student — VLA Eval Model Server Config
+# Used by: forge eval serve
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  protocol: "websocket"
+
+model:
+  variant: "nano"           # nano | small | micro | medium
+  checkpoint: "./outputs/checkpoints/best.pt"
+  device: "cuda"
+  image_size: 384
+  chunk_size: 1
+
+# Action space normalization
+action:
+  scale: 1.0
+  offset: 0.0

@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use FORGE in research, please cite this software."
+title: "FORGE: VLA Model Distillation for Edge Robotics"
+type: software
+version: 3.0.0
+date-released: 2026-07-13
+authors:
+  - name: RobotFlow Labs
+repository-code: "https://github.com/RobotFlow-Labs/anima-forge-distillation-pipeline"
+license: Apache-2.0

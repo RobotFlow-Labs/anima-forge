@@ -1,0 +1,45 @@
+services:
+  # CPU/Mac development and testing
+  forge-dev:
+    build:
+      context: .
+      target: base
+      args:
+        FORGE_GIT_SHA: ${FORGE_GIT_SHA:-unknown}
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./configs:/app/configs
+      - ./data:/app/data
+      - ${FORGE_MODEL_DIR:-./models}:/models:ro
+    environment:
+      - FORGE_MODEL_DIR=/models
+      - FORGE_DEVICE=cpu
+    command: uv run pytest tests/ -v --tb=short
+
+  # GPU training (requires NVIDIA runtime)
+  forge-train:
+    build:
+      context: .
+      target: cuda
+      args:
+        FORGE_GIT_SHA: ${FORGE_GIT_SHA:-unknown}
+    volumes:
+      - ./src:/app/src
+      - ./configs:/app/configs
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+      - ${FORGE_MODEL_DIR:-./models}:/models:ro
+    environment:
+      - FORGE_MODEL_DIR=/models
+      - FORGE_DEVICE=cuda
+      - WANDB_API_KEY=${WANDB_API_KEY:-}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - gpu

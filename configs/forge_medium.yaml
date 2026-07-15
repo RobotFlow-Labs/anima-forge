@@ -1,0 +1,36 @@
+# FORGE-Medium Configuration (Qwen3-4B student)
+
+paths:
+  model_dir: ./models
+  teacher: openvla--openvla-7b
+  vision_encoder: google--siglip2-so400m-patch14-384
+  language_model: Qwen--Qwen3-4B
+  output_dir: ./outputs
+  data_dir: ./data
+
+student:
+  variant: medium
+  vision_encoder: google/siglip2-so400m-patch14-384
+  language_model: Qwen/Qwen3-4B
+  backbone_dtype: bfloat16
+  bridge_d_vision: 1152
+  bridge_d_model: 2560
+  bridge_n_queries: 64
+  bridge_n_heads: 16
+  bridge_n_layers: 4
+  action_dim: 7
+  action_head_layers: 4
+  action_diffusion_steps: 10
+  lora_rank: 64
+  lora_alpha: 128
+
+distill:
+  learning_rate: 1e-4
+  weight_decay: 0.01
+  warmup_steps: 500
+  max_steps: 80000
+  batch_size: 2
+  gradient_accumulation_steps: 16
+
+export:
+  formats: [onnx, mlx, tensorrt]

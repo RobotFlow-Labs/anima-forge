@@ -1,0 +1,17 @@
+# SimplerEnv Benchmark — FORGE Evaluation Config
+# Used by: forge eval run simpler --config configs/eval/simpler_forge.yaml
+
+server:
+  url: "ws://localhost:8000"
+
+docker:
+  image: ghcr.io/allenai/vla-evaluation-harness/simpler:latest
+  network: host
+
+benchmarks:
+  - benchmark: "vla_eval.benchmarks.simpler.benchmark:SimplerEnvBenchmark"
+    mode: sync
+    episodes_per_task: 20
+    max_tasks: 10
+    params:
+      seed: 42

@@ -1,0 +1,34 @@
+{
+  "exceptions": [
+    {
+      "package": "diffusers",
+      "advisory": "PYSEC-2026-40",
+      "expires": "2026-08-13",
+      "rationale": "FORGE does not import DiffusionPipeline or enable custom pipelines; mandatory LeRobot 0.6 pins diffusers below the fixed 0.38 release."
+    },
+    {
+      "package": "diffusers",
+      "advisory": "PYSEC-2026-41",
+      "expires": "2026-08-13",
+      "rationale": "FORGE does not import DiffusionPipeline or enable custom pipelines; mandatory LeRobot 0.6 pins diffusers below the fixed 0.38 release."
+    },
+    {
+      "package": "diffusers",
+      "advisory": "PYSEC-2026-2446",
+      "expires": "2026-08-13",
+      "rationale": "FORGE does not import DiffusionPipeline or enable custom pipelines; mandatory LeRobot 0.6 pins diffusers below the fixed 0.38 release."
+    },
+    {
+      "package": "torch",
+      "advisory": "PYSEC-2026-139",
+      "expires": "2026-08-13",
+      "rationale": "No fixed PyTorch release is listed; FORGE requires weights_only checkpoint loading and does not invoke the affected PT2 archive entrypoint."
+    },
+    {
+      "package": "torch",
+      "advisory": "CVE-2025-3000",
+      "expires": "2026-08-13",
+      "rationale": "No fixed PyTorch release is listed; FORGE does not invoke torch.jit.script and will adopt the first upstream fixed build compatible with torchvision."
+    }
+  ]
+}

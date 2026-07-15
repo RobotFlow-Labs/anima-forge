@@ -1,0 +1,230 @@
+name: FORGE CI
+
+on:
+  push:
+    branches: [develop, main, "v3/*"]
+  pull_request:
+    branches: [develop, main, "v3/*"]
+  workflow_dispatch:
+    inputs:
+      run_gpu_tests:
+        description: Run the optional self-hosted GPU validation job
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Reclaim runner disk for the complete ML runtime
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
+          df -h /
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+
+      - name: Set up Python
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --locked --group dev
+
+      - name: Audit locked production dependencies
+        run: |
+          uv export --locked --no-dev --no-emit-project --format requirements.txt --no-hashes \
+            --output-file /tmp/forge-runtime-requirements.txt
+          set +e
+          uvx --python 3.12 --from pip-audit==2.10.1 pip-audit \
+            --requirement /tmp/forge-runtime-requirements.txt \
+            --no-deps --disable-pip --progress-spinner off --format json \
+            --output /tmp/forge-pip-audit.json
+          audit_status=$?
+          set -e
+          if [ "$audit_status" -gt 1 ]; then
+            exit "$audit_status"
+          fi
+          uv run python scripts/check_dependency_audit.py \
+            --audit /tmp/forge-pip-audit.json \
+            --allowlist .github/dependency-audit-allowlist.json
+
+      - name: Lint
+        run: uv run ruff check src/ scripts/ tests/
+
+      - name: Format check
+        run: uv run ruff format --check src/ scripts/ tests/
+
+      - name: Validate release kit
+        run: uv run python scripts/build_release_kit.py --check
+
+      - name: Reject private operator material in the public snapshot
+        run: uv run python scripts/check_public_snapshot.py --json
+
+      - name: Run tests (CPU only)
+        run: uv run pytest tests/ -v -m "not gpu" --timeout=120
+
+      - name: Type check
+        run: uv run mypy src/forge/ scripts/
+
+  gpu-test:
+    runs-on: [self-hosted, gpu]
+    if: github.event_name == 'workflow_dispatch' && inputs.run_gpu_tests
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Install deps
+        run: uv sync --locked --group dev
+
+      - name: Run and profile GPU tests
+        run: |
+          mkdir -p outputs/validation/gpu-ci
+          uv run python scripts/gpu_fit_profiler.py \
+            --command "uv run pytest tests/ -v -m gpu --timeout=300" \
+            --out outputs/validation/gpu-ci/gpu_tests.csv \
+            --interval 5 \
+            --json
+          uv run python - <<'PY'
+          import json
+          from pathlib import Path
+
+          csv_path = Path("outputs/validation/gpu-ci/gpu_tests.csv")
+          payload = json.loads(csv_path.with_suffix(".csv.json").read_text(encoding="utf-8"))
+          assert csv_path.stat().st_size > 0
+          assert payload["status"] == "finished"
+          assert payload["rows"]
+          PY
+
+      - name: Preserve GPU profile evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: gpu-test-profile-${{ github.run_id }}
+          path: outputs/validation/gpu-ci/
+          if-no-files-found: error
+
+  wheel-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Reclaim runner disk for the complete ML runtime
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
+          df -h /
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      - run: uv python install 3.12
+      - name: Check installer shell
+        run: shellcheck install.sh
+      - run: uv build
+      - name: Install wheel through the public installer
+        env:
+          UV_TOOL_DIR: /tmp/forge-tool-envs
+          UV_TOOL_BIN_DIR: /tmp/forge-tool-bin
+        run: ./install.sh --cpu --from-wheel "$(echo dist/*.whl)" --no-modify-path
+      - name: Smoke installed wheel outside checkout
+        working-directory: /tmp
+        run: |
+          /tmp/forge-tool-bin/forge --version > /tmp/forge-version.txt
+          /tmp/forge-tool-bin/forge > /tmp/forge-bare.txt
+          /tmp/forge-tool-bin/forge config init > /tmp/forge.yaml
+          /tmp/forge-tool-bin/forge profile card --variant nano --output /tmp/card.json --markdown /tmp/card.md --json > /tmp/profile.json
+          set +e
+          /tmp/forge-tool-bin/forge doctor --json > /tmp/doctor.json
+          doctor_exit=$?
+          set -e
+          test "$doctor_exit" -ge 0
+          test "$doctor_exit" -le 2
+          /tmp/forge-tool-envs/anima-forge/bin/python \
+            "$GITHUB_WORKSPACE/scripts/verify_installed_runtime.py" --expected-version 3.0.1 --require-cpu
+          /tmp/forge-tool-envs/anima-forge/bin/python - <<'PY'
+          import json
+          from importlib.resources import files
+
+          import forge
+          import torch
+          assert forge.__version__ == "3.0.1"
+          assert torch.version.cuda is None
+          assert open("/tmp/forge-version.txt").read().strip() == forge.__version__
+          assert files("forge.web").joinpath("dashboard.html").is_file()
+          assert json.load(open("/tmp/profile.json"))["variant"] == "nano"
+          assert json.load(open("/tmp/doctor.json"))["status"] == "error"
+          PY
+
+      - name: Verify installed CLI matches the public reference
+        run: /tmp/forge-tool-envs/anima-forge/bin/python scripts/generate_cli_reference.py --check
+
+      - name: Smoke pipx installer backend
+        working-directory: /tmp
+        env:
+          PIPX_HOME: /tmp/forge-pipx-home
+          PIPX_BIN_DIR: /tmp/forge-pipx-bin
+        run: |
+          UV_TOOL_DIR=/tmp/forge-pipx-bootstrap UV_TOOL_BIN_DIR=/tmp/forge-pipx-bootstrap-bin uv tool install pipx
+          PATH="/tmp/forge-pipx-bootstrap-bin:$PATH" "$GITHUB_WORKSPACE/install.sh" \
+            --cpu --backend pipx --from-wheel "$(echo "$GITHUB_WORKSPACE"/dist/*.whl)" --no-modify-path
+          /tmp/forge-pipx-home/venvs/anima-forge/bin/python \
+            "$GITHUB_WORKSPACE/scripts/verify_installed_runtime.py" --expected-version 3.0.1 --require-cpu
+
+  macos-installer-smoke:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      - run: uv python install 3.12
+      - run: uv build
+      - name: Install complete Apple Silicon wheel
+        env:
+          UV_TOOL_DIR: /tmp/forge-macos-envs
+          UV_TOOL_BIN_DIR: /tmp/forge-macos-bin
+        run: ./install.sh --cpu --from-wheel "$(echo dist/*.whl)" --no-modify-path
+      - name: Verify macOS runtime imports outside checkout
+        working-directory: /tmp
+        run: |
+          /tmp/forge-macos-bin/forge --version
+          /tmp/forge-macos-envs/anima-forge/bin/python \
+            "$GITHUB_WORKSPACE/scripts/verify_installed_runtime.py" --expected-version 3.0.1 --require-cpu
+          /tmp/forge-macos-envs/anima-forge/bin/python - <<'PY'
+          import coremltools
+          import mlx
+          import mlx.core as mx
+          import numpy as np
+          import torch
+          from forge.turboquant.mlx_backend import MLXTurboQuantizer
+          assert all((coremltools, mlx))
+          assert torch.version.cuda is None
+          weight = mx.arange(32, dtype=mx.float32).reshape(4, 8) / 32
+          quantized = MLXTurboQuantizer(bits=3, group_size=2).quantize_weight(weight)
+          assert quantized.shape == weight.shape
+          assert np.isfinite(np.asarray(quantized)).all()
+          PY
+
+  windows-installer-smoke:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      - run: uv python install 3.12
+      - run: uv build
+      - name: Install complete Windows wheel
+        shell: pwsh
+        env:
+          UV_TOOL_DIR: ${{ runner.temp }}\forge-tool-envs
+          UV_TOOL_BIN_DIR: ${{ runner.temp }}\forge-tool-bin
+        run: .\install.ps1 -Device cpu -FromWheel (Get-ChildItem dist\*.whl).FullName -NoModifyPath
+      - name: Verify Windows runtime imports outside checkout
+        shell: pwsh
+        working-directory: ${{ runner.temp }}
+        env:
+          UV_TOOL_DIR: ${{ runner.temp }}\forge-tool-envs
+          UV_TOOL_BIN_DIR: ${{ runner.temp }}\forge-tool-bin
+        run: |
+          & "$env:UV_TOOL_BIN_DIR\forge.exe" --version
+          & "$env:UV_TOOL_DIR\anima-forge\Scripts\python.exe" "$env:GITHUB_WORKSPACE\scripts\verify_installed_runtime.py" --expected-version 3.0.1 --require-cpu
+          & "$env:UV_TOOL_DIR\anima-forge\Scripts\python.exe" -c "import onnxruntime; assert onnxruntime"

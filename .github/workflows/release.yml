@@ -1,0 +1,158 @@
+name: Publish FORGE
+
+on:
+  push:
+    tags: ["v3.0.1"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      - run: uv python install 3.12
+      - name: Audit locked production dependencies
+        run: |
+          uv export --locked --no-dev --no-emit-project --format requirements.txt --no-hashes \
+            --output-file /tmp/forge-runtime-requirements.txt
+          set +e
+          uvx --python 3.12 --from pip-audit==2.10.1 pip-audit \
+            --requirement /tmp/forge-runtime-requirements.txt \
+            --no-deps --disable-pip --progress-spinner off --format json \
+            --output /tmp/forge-pip-audit.json
+          audit_status=$?
+          set -e
+          if [ "$audit_status" -gt 1 ]; then
+            exit "$audit_status"
+          fi
+          uv run --no-project python scripts/check_dependency_audit.py \
+            --audit /tmp/forge-pip-audit.json \
+            --allowlist .github/dependency-audit-allowlist.json
+      - name: Reject private operator material in the release snapshot
+        run: uv run --no-project python scripts/check_public_snapshot.py --json
+      - name: Build reproducible distributions
+        run: |
+          export SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
+          export FORGE_GIT_SHA="$(git rev-parse HEAD)"
+          uv build
+      - run: uvx twine check dist/*
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: python-dist
+          path: dist/
+
+  wheel-smoke:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Reclaim runner disk for the complete ML runtime
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
+          df -h /
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      - run: uv python install 3.12
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-dist
+          path: dist/
+      - run: uv venv /tmp/forge-release --python 3.12
+      - run: uv pip install --python /tmp/forge-release/bin/python dist/*.whl
+      - name: Verify the release wheel outside the checkout
+        working-directory: /tmp
+        run: |
+          /tmp/forge-release/bin/forge info --json
+          /tmp/forge-release/bin/python "$GITHUB_WORKSPACE/scripts/verify_installed_runtime.py" \
+            --expected-version 3.0.1
+      - name: Verify installed CLI matches the public reference
+        run: /tmp/forge-release/bin/python scripts/generate_cli_reference.py --check
+
+  test-pypi:
+    if: github.event_name == 'workflow_dispatch'
+    needs: wheel-smoke
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Reclaim runner disk for the complete ML runtime
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
+          df -h /
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      - run: uv python install 3.12
+      - name: Verify TestPyPI serves these exact distributions
+        run: >-
+          uv run --no-project python scripts/verify_testpypi_artifact.py
+          --dist-dir dist --download-dir testpypi-dist
+          --package anima-forge --attempts 12 --delay 10
+      - run: uv venv /tmp/forge-testpypi --python 3.12
+      - name: Install and execute from TestPyPI
+        run: |
+          uv pip install --python /tmp/forge-testpypi/bin/python \
+            --index-url https://pypi.org/simple/ \
+            testpypi-dist/*.whl
+          cd /tmp
+          /tmp/forge-testpypi/bin/forge info --json
+          /tmp/forge-testpypi/bin/python "$GITHUB_WORKSPACE/scripts/verify_installed_runtime.py" \
+            --expected-version 3.0.1
+
+  test-pypi-acceptance:
+    if: github.event_name == 'push'
+    needs: wheel-smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Reclaim runner disk for the complete ML runtime
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
+          df -h /
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-dist
+          path: dist/
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      - run: uv python install 3.12
+      - name: Require the exact distributions already accepted on TestPyPI
+        run: >-
+          uv run --no-project python scripts/verify_testpypi_artifact.py
+          --dist-dir dist --download-dir testpypi-dist
+          --package anima-forge --attempts 12 --delay 10
+      - run: uv venv /tmp/forge-testpypi-tag --python 3.12
+      - name: Install and execute the exact TestPyPI wheel
+        run: |
+          uv pip install --python /tmp/forge-testpypi-tag/bin/python \
+            --index-url https://pypi.org/simple/ \
+            testpypi-dist/*.whl
+          cd /tmp
+          /tmp/forge-testpypi-tag/bin/forge info --json
+          /tmp/forge-testpypi-tag/bin/python "$GITHUB_WORKSPACE/scripts/verify_installed_runtime.py" \
+            --expected-version 3.0.1
+
+  pypi:
+    if: github.event_name == 'push'
+    needs: [wheel-smoke, test-pypi-acceptance]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1

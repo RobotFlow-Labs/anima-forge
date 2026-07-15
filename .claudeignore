@@ -1,0 +1,7 @@
+.venv/
+repositories/
+*.so
+__pycache__/
+*.pyc
+outputs/
+hf_upload/

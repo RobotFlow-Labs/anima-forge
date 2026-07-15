@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FORGE // HERO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rf-accent: #FF3B00;
+      --rf-accent-glow: rgba(255, 59, 0, 0.3);
+      --rf-accent-dim: rgba(255, 59, 0, 0.15);
+      --rf-bg: #050505;
+      --rf-bg-panel: #1A1A1A;
+      --rf-border: #333333;
+      --rf-text: #ffffff;
+      --rf-text-dim: #999999;
+      --rf-success: #00FF88;
+      --rf-restricted: #9B5EFF;
+      --rf-font-display: 'Oswald', sans-serif;
+      --rf-font-mono: 'JetBrains Mono', monospace;
+      --rf-font-tech: 'Chakra Petch', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--rf-font-mono);
+      background: var(--rf-bg);
+      color: var(--rf-text);
+      width: 1280px;
+      height: 640px;
+      overflow: hidden;
+    }
+
+    /* SCANLINE */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      background: repeating-linear-gradient(
+        to bottom, transparent, transparent 2px,
+        rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+      );
+    }
+
+    /* GRID BG */
+    .hero-wrap {
+      position: relative;
+      width: 1280px;
+      height: 640px;
+      background:
+        linear-gradient(rgba(255,59,0,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,59,0,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      border: 1px solid var(--rf-border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* CORNER BRACKETS */
+    .hero-wrap::before,
+    .hero-wrap::after {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-color: var(--rf-accent);
+      border-style: solid;
+    }
+    .hero-wrap::before {
+      top: 12px; left: 12px;
+      border-width: 2px 0 0 2px;
+    }
+    .hero-wrap::after {
+      bottom: 12px; right: 12px;
+      border-width: 0 2px 2px 0;
+    }
+
+    .corner-tr, .corner-bl {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-color: var(--rf-accent);
+      border-style: solid;
+    }
+    .corner-tr { top: 12px; right: 12px; border-width: 2px 2px 0 0; }
+    .corner-bl { bottom: 12px; left: 12px; border-width: 0 0 2px 2px; }
+
+    /* GLOW LINE */
+    .glow-line {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--rf-accent), transparent);
+      animation: scan 3s ease-in-out infinite;
+    }
+    @keyframes scan {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* TAG */
+    .hero-tag {
+      font-family: var(--rf-font-mono);
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--rf-accent);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      padding: 4px 16px;
+      border: 1px solid var(--rf-accent);
+      background: rgba(255,59,0,0.08);
+    }
+
+    /* MODULE CODE */
+    .module-code {
+      font-family: var(--rf-font-mono);
+      font-size: 13px;
+      color: var(--rf-text-dim);
+      letter-spacing: 4px;
+      margin-bottom: 8px;
+    }
+
+    /* TITLE */
+    .hero-title {
+      font-family: var(--rf-font-display);
+      font-size: 64px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.0;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .hero-title .accent { color: var(--rf-accent); }
+
+    /* SUBTITLE */
+    .hero-subtitle {
+      font-family: var(--rf-font-tech);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--rf-text-dim);
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+    }
+
+    /* DESC */
+    .hero-desc {
+      font-size: 14px;
+      color: var(--rf-text-dim);
+      max-width: 720px;
+      text-align: center;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+    .hero-desc .hl { color: var(--rf-text); }
+
+    /* STATS ROW */
+    .stats-row {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 28px;
+    }
+    .stat {
+      text-align: center;
+      padding: 12px 24px;
+      border: 1px solid var(--rf-border);
+      background: var(--rf-bg-panel);
+      min-width: 160px;
+    }
+    .stat-value {
+      font-family: var(--rf-font-display);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--rf-accent);
+    }
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--rf-text-dim);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* TAGS */
+    .tag-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .tag {
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border: 1px solid var(--rf-border);
+      color: var(--rf-text-dim);
+      text-transform: uppercase;
+    }
+    .tag.active { border-color: var(--rf-success); color: var(--rf-success); }
+
+    /* BOTTOM STATUS BAR */
+    .status-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 36px;
+      background: var(--rf-bg-panel);
+      border-top: 1px solid var(--rf-border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 24px;
+      font-size: 11px;
+      color: var(--rf-text-dim);
+      letter-spacing: 1px;
+    }
+    .status-bar .dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    .dot.green { background: var(--rf-success); box-shadow: 0 0 8px var(--rf-success); }
+    .dot.orange { background: #FFB800; box-shadow: 0 0 8px #FFB800; }
+
+    /* CREDITS */
+    .credits {
+      position: absolute;
+      top: 16px;
+      right: 60px;
+      font-size: 10px;
+      color: var(--rf-text-dim);
+      letter-spacing: 1px;
+      text-align: right;
+      line-height: 1.8;
+    }
+    .credits a { color: var(--rf-accent); text-decoration: none; }
+
+    /* PILLAR TAG */
+    .pillar-tag {
+      position: absolute;
+      top: 16px;
+      left: 60px;
+      font-size: 10px;
+      color: var(--rf-accent);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    /* PIPELINE FLOW */
+    .pipeline-flow {
+      font-family: var(--rf-font-mono);
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--rf-text-dim);
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+    .pipeline-flow .stage { color: var(--rf-text); }
+    .pipeline-flow .arrow { color: var(--rf-accent); padding: 0 6px; }
+  </style>
+</head>
+<body>
+  <div class="hero-wrap">
+    <div class="glow-line"></div>
+    <div class="corner-tr"></div>
+    <div class="corner-bl"></div>
+
+    <div class="pillar-tag">PILLAR 02 — ANIMA SUITE</div>
+
+    <div class="credits">
+      SYSTEM: <a href="https://robotflow-labs.github.io">ANIMA</a><br>
+      BUILT BY: <a href="https://robotflow-labs.github.io">ROBOTFLOW LABS</a>
+    </div>
+
+    <div class="hero-tag">MODULE ANM-040</div>
+    <div class="module-code">ANIMA-FORGE</div>
+    <div class="hero-title">
+      <span class="accent">FORGE</span> — DISTILL ANY VLA
+    </div>
+    <div class="hero-subtitle">7B+ VISION-LANGUAGE-ACTION &rarr; &lt;2GB REAL-TIME EDGE MODELS</div>
+
+    <div class="pipeline-flow">
+      <span class="stage">TEACHER LABELS</span><span class="arrow">&#9656;</span><span class="stage">DISTILL</span><span class="arrow">&#9656;</span><span class="stage">PRUNE + QUANTIZE</span><span class="arrow">&#9656;</span><span class="stage">DEPLOY</span>
+    </div>
+
+    <p class="hero-desc">
+      Take any foundation-scale Vision-Language-Action model and forge it into a
+      <span class="hl">real-time student for edge robots</span>.<br>
+      Multi-teacher distillation, chunk-aware quantization, flow-matching action heads — <span class="hl">one CLI</span>.
+    </p>
+
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-value">8X</div>
+        <div class="stat-label">Weight Compression</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">&lt;2GB</div>
+        <div class="stat-label">Edge Footprint</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">5</div>
+        <div class="stat-label">Teacher Models</div>
+      </div>
+    </div>
+
+    <div class="tag-row">
+      <span class="tag active">VLA</span>
+      <span class="tag active">DISTILLATION</span>
+      <span class="tag">QUANTIZATION</span>
+      <span class="tag">ONNX / TENSORRT</span>
+      <span class="tag">FLOW MATCHING</span>
+      <span class="tag active">EDGE ROBOTICS</span>
+    </div>
+
+    <div class="status-bar">
+      <span><span class="dot green"></span>DISTILL ENGINE: OPERATIONAL</span>
+      <span><span class="dot green"></span>QUANTIZER: OPERATIONAL</span>
+      <span><span class="dot green"></span>ONNX EXPORT: OPERATIONAL</span>
+      <span><span class="dot orange"></span>JETSON DEPLOY: STAGING</span>
+      <span style="margin-left:auto; color:#666;">ROBOTFLOW LABS — 2026</span>
+    </div>
+  </div>
+</body>
+</html>

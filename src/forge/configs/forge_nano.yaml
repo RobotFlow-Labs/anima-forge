@@ -1,0 +1,64 @@
+# Packaged FORGE-Nano default used when the CLI runs outside a source checkout.
+paths:
+  model_dir: ./models
+  teacher: openvla--openvla-7b
+  vision_encoder: google--siglip2-so400m-patch14-384
+  language_model: Qwen--Qwen3-0.6B
+  output_dir: ./outputs
+  data_dir: ./data
+
+teacher:
+  adapter: openvla-7b
+  dataset: HuggingFaceVLA--smol-libero
+  benchmark: libero_spatial
+  batch_size: 4
+  save_attention: false
+  save_vision_features: true
+  episodes_per_task: 50
+  max_steps_per_episode: 200
+
+student:
+  variant: nano
+  vision_encoder: google/siglip2-so400m-patch14-384
+  language_model: Qwen/Qwen3-0.6B
+  backbone_dtype: auto
+  bridge_d_vision: 1152
+  bridge_d_model: 1024
+  bridge_n_queries: 64
+  bridge_n_heads: 8
+  bridge_n_layers: 4
+  action_dim: 7
+  action_head_layers: 4
+  action_diffusion_steps: 10
+  lora_rank: 32
+  lora_alpha: 64
+
+distill:
+  learning_rate: 2e-4
+  weight_decay: 0.01
+  warmup_steps: 500
+  max_steps: 50000
+  batch_size: 16
+  gradient_accumulation_steps: 4
+  temperature: 4.0
+  alpha_kd: 0.4
+  alpha_task: 0.3
+  alpha_feat: 0.2
+  alpha_action: 0.1
+
+pruning:
+  target_layers: 8
+  calibration_samples: 500
+  recovery_lr: 5e-5
+  recovery_steps: 5000
+
+quant:
+  target_avg_bits: 4.0
+  min_bits: 2
+  max_bits: 8
+  calibration_samples: 200
+
+export:
+  formats: [onnx, mlx, tensorrt]
+  tensorrt_precision: int8
+  onnx_opset: 19

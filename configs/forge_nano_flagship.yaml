@@ -1,0 +1,62 @@
+# FORGE-Nano flagship validation config (Qwen3-0.6B + flow head + LoRA-64)
+
+paths:
+  model_dir: ./models
+  teacher: openvla--openvla-7b
+  vision_encoder: google--siglip2-so400m-patch14-384
+  language_model: Qwen--Qwen3-0.6B
+  output_dir: ./outputs
+  data_dir: ./data
+
+student:
+  variant: nano
+  vision_encoder: google/siglip2-so400m-patch14-384
+  language_model: Qwen/Qwen3-0.6B
+  backbone_dtype: auto
+  bridge_d_vision: 1152
+  bridge_d_model: 1024
+  bridge_n_queries: 64
+  bridge_n_heads: 8
+  bridge_n_layers: 4
+  action_dim: 7
+  action_head_type: flow
+  action_head_layers: 4
+  flow_inference_steps: 4
+  lora_rank: 64
+  lora_alpha: 128
+  allow_mock: false
+
+distill:
+  learning_rate: 2e-4
+  weight_decay: 0.01
+  warmup_steps: 500
+  max_steps: 5000
+  batch_size: 80
+  gradient_accumulation_steps: 4
+  temperature: 4.0
+  alpha_kd: 0.4
+  alpha_task: 0.3
+  alpha_feat: 0.2
+  alpha_action: 0.1
+  save_every: 2000
+
+pruning:
+  target_layers: 11
+  calibration_samples: 8
+  recovery_lr: 5e-5
+  recovery_steps: 5000
+  keep_first_n: 2
+  keep_last_n: 2
+
+quant:
+  method: qvla
+  bits: 4
+  target_avg_bits: 4.0
+  min_bits: 2
+  max_bits: 8
+  calibration_samples: 8
+
+export:
+  formats: [onnx, mlx, tensorrt]
+  tensorrt_precision: fp16
+  onnx_opset: 19

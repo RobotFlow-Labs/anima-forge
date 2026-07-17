@@ -95,17 +95,24 @@ path and its publication status note.
 | **3 · Compression** | Layer pruning + mixed-precision quantization | Shallow-Pi, QVLA, TurboQuant, chunk-aware importance |
 | **4 · Export** | Runtime conversion + validation + benchmark | torch dynamo ONNX, TensorRT INT8/FP16, MLX |
 
-Launch-week validation is running on four NVIDIA L4 GPUs. The corrected SigLIP2
-preprocessing audit invalidated the first small/medium comparison runs, so no launch
-measurement is published until the four variants are retrained and their artifact
-matrices pass again. Historical tuning results remain clearly labelled in the
-hyperparameter guide.
+### Release-smoke benchmarks
 
-| Completed variant | Real training loss reduction | Packed INT4 | ONNX CUDA | TensorRT fp16 |
-|---|---:|---:|---:|---:|
+The current launch artifacts were trained for 5,000 steps per variant on four NVIDIA L4
+GPUs using the corrected SigLIP2 real-label provenance pack, then exported and benchmarked
+with real PushT video input. These numbers are release-smoke latency/export/provenance
+measurements, not broad robot task-success claims. The exact machine-readable summary is
+saved in [`hf_upload/benchmark_summary.json`](hf_upload/benchmark_summary.json).
 
-Rows will appear only after corrected real-data training, compression, runtime execution,
-and provenance checks complete. FORGE does not publish projections as measurements.
+| Variant | Train steps | Final loss | QVLA INT4 ratio | QVLA INT4 artifact | ONNX CUDA p50 | ONNX FPS | PyTorch CUDA p50 | PyTorch FPS |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `micro` | 5,000 | 0.086293 | 6.927× | 304.1 MB | 64.931 ms | 15.365 | 126.958 ms | 7.770 |
+| `nano` | 5,000 | 0.085447 | 5.580× | 621.9 MB | 77.788 ms | 12.898 | 142.064 ms | 6.978 |
+| `small` | 5,000 | 0.085069 | 5.090× | 1397.2 MB | 105.381 ms | 9.444 | 160.774 ms | 6.189 |
+| `medium` | 5,000 | 0.085358 | 4.611× | 2604.2 MB | 163.489 ms | 6.096 | 172.796 ms | 5.764 |
+
+Export status: ONNX Runtime CUDA and MLX exports completed for all four variants with
+finite action outputs. TensorRT was attempted on `micro`, but engine build did not produce
+a usable `.engine` on this host, so TensorRT numbers are intentionally not published here.
 
 ## Student variants
 

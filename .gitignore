@@ -61,3 +61,8 @@ old_docs/
 /.ruff_cache/
 /benchmarks/**
 !/benchmarks/.gitkeep
+
+# Local Hugging Face upload staging: keep docs/summary, never commit model payloads.
+/hf_upload/**
+!/hf_upload/README.md
+!/hf_upload/benchmark_summary.json

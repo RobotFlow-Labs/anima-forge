@@ -1,0 +1,199 @@
+{
+  "created_utc": "2026-07-16T12:05:00Z",
+  "schema": "forge.hf-upload-benchmark-summary.v1",
+  "source": {
+    "benchmark_input": "LeRobot PushT real video frame with explicit CLI instruction",
+    "forge_version": "3.0.1",
+    "git_sha": "3787129cbe19b5ef30dfb7222b8e66db65b985a2",
+    "run": "four-variant-5000-batch1-20260715",
+    "scope_note": "Release-smoke latency/export/provenance benchmark; not a broad task-success benchmark.",
+    "tensorrt_note": "TensorRT was attempted on micro but did not produce an engine; ONNX/MLX exports completed with TensorRT disabled for benchmark aggregation.",
+    "training_data": "corrected SigLIP2 real-label smoke/provenance pack"
+  },
+  "variants": [
+    {
+      "artifacts": {
+        "checkpoint_mb": 2055.661,
+        "mlx_mb": 1157.397,
+        "onnx_total_mb": 2269.597,
+        "qvla_int4_mb": 304.082
+      },
+      "compression": {
+        "artifact_sha256": "c540d369ff09bc8a6a6c0f6c9bdd8e5cb2e50522b84f24808e60d859a0253ede",
+        "bits": 4,
+        "method": "qvla",
+        "ratio": 6.927
+      },
+      "onnx_cuda": {
+        "actions_finite": true,
+        "actions_shape": [
+          1,
+          7
+        ],
+        "fps": 15.365,
+        "p50_ms": 64.931,
+        "p95_ms": 65.757,
+        "provider": "CUDAExecutionProvider",
+        "status": "success"
+      },
+      "pytorch_cuda": {
+        "actions_finite": true,
+        "actions_shape": [
+          1,
+          7
+        ],
+        "fps": 7.77,
+        "p50_ms": 126.958,
+        "p95_ms": 128.039,
+        "status": "completed"
+      },
+      "training": {
+        "best_loss": 0.084972,
+        "device": "cuda:0",
+        "elapsed_seconds": 4511.1,
+        "final_loss": 0.086293,
+        "status": "completed",
+        "steps": 5000
+      },
+      "variant": "micro"
+    },
+    {
+      "artifacts": {
+        "checkpoint_mb": 3169.253,
+        "mlx_mb": 2173.946,
+        "onnx_total_mb": 4299.965,
+        "qvla_int4_mb": 621.881
+      },
+      "compression": {
+        "artifact_sha256": "c0e3894a8e14009dd047562a0f039a78e61e9901a22e870b31b82c828d5df878",
+        "bits": 4,
+        "method": "qvla",
+        "ratio": 5.58
+      },
+      "onnx_cuda": {
+        "actions_finite": true,
+        "actions_shape": [
+          1,
+          7
+        ],
+        "fps": 12.898,
+        "p50_ms": 77.788,
+        "p95_ms": 80.129,
+        "provider": "CUDAExecutionProvider",
+        "status": "success"
+      },
+      "pytorch_cuda": {
+        "actions_finite": true,
+        "actions_shape": [
+          1,
+          7
+        ],
+        "fps": 6.978,
+        "p50_ms": 142.064,
+        "p95_ms": 143.298,
+        "status": "completed"
+      },
+      "training": {
+        "best_loss": 0.084966,
+        "device": "cuda:1",
+        "elapsed_seconds": 4976.9,
+        "final_loss": 0.085447,
+        "status": "completed",
+        "steps": 5000
+      },
+      "variant": "nano"
+    },
+    {
+      "artifacts": {
+        "checkpoint_mb": 6507.439,
+        "mlx_mb": 4963.853,
+        "onnx_total_mb": 9880.378,
+        "qvla_int4_mb": 1397.172
+      },
+      "compression": {
+        "artifact_sha256": "bc927369b4fe8ecb14f7c1ff57fe700f408085d70b4b8214e5b109da664d367b",
+        "bits": 4,
+        "method": "qvla",
+        "ratio": 5.09
+      },
+      "onnx_cuda": {
+        "actions_finite": true,
+        "actions_shape": [
+          1,
+          7
+        ],
+        "fps": 9.444,
+        "p50_ms": 105.381,
+        "p95_ms": 108.941,
+        "provider": "CUDAExecutionProvider",
+        "status": "success"
+      },
+      "pytorch_cuda": {
+        "actions_finite": true,
+        "actions_shape": [
+          1,
+          7
+        ],
+        "fps": 6.189,
+        "p50_ms": 160.774,
+        "p95_ms": 162.244,
+        "status": "completed"
+      },
+      "training": {
+        "best_loss": 0.084968,
+        "device": "cuda:2",
+        "elapsed_seconds": 12185.3,
+        "final_loss": 0.085069,
+        "status": "completed",
+        "steps": 5000
+      },
+      "variant": "small"
+    },
+    {
+      "artifacts": {
+        "checkpoint_mb": 11243.626,
+        "mlx_mb": 9635.984,
+        "onnx_total_mb": 19225.822,
+        "qvla_int4_mb": 2604.161
+      },
+      "compression": {
+        "artifact_sha256": "621da7678879202ada8af054c124acdcff7a38d93a3774b67d13804f1863be3a",
+        "bits": 4,
+        "method": "qvla",
+        "ratio": 4.611
+      },
+      "onnx_cuda": {
+        "actions_finite": true,
+        "actions_shape": [
+          1,
+          7
+        ],
+        "fps": 6.096,
+        "p50_ms": 163.489,
+        "p95_ms": 166.923,
+        "provider": "CUDAExecutionProvider",
+        "status": "success"
+      },
+      "pytorch_cuda": {
+        "actions_finite": true,
+        "actions_shape": [
+          1,
+          7
+        ],
+        "fps": 5.764,
+        "p50_ms": 172.796,
+        "p95_ms": 174.415,
+        "status": "completed"
+      },
+      "training": {
+        "best_loss": 0.084951,
+        "device": "cuda:3",
+        "elapsed_seconds": 27743.5,
+        "final_loss": 0.085358,
+        "status": "completed",
+        "steps": 5000
+      },
+      "variant": "medium"
+    }
+  ]
+}
